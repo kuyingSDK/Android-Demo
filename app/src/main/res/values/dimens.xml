@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="sdm_pic_size">100dp</dimen>
+    <dimen name="sdm_pic_width">42dp</dimen>
+    <dimen name="sdm_pic_height">74dp</dimen>
+    <dimen name="sdm_format_pic_height">165dp</dimen>
+    <dimen name="sdm_title_margin_left">12dp</dimen>
+    <dimen name="sdm_title_margin_top">16dp</dimen>
+    <dimen name="sdm_desc_margin_top">4dp</dimen>
+    <dimen name="sdm_padding">12dp</dimen>
+    <dimen name="sdm_padding_5dp">5dp</dimen>
+
+    <dimen name="sdm_text_size_12">12sp</dimen>
+    <dimen name="sdm_title_size">18sp</dimen>
+    <dimen name="sdm_desc_size">14sp</dimen>
+    <dimen name="sdm_name_size">16sp</dimen>
+    <dimen name="sdm_button_size">13dp</dimen>
+    <dimen name="sdm_title_bar_text_size">20sp</dimen>
+
+    <dimen name="sdm_line_width">2dp</dimen>
+    <dimen name="sdm_line_height">12dp</dimen>
+
+    <dimen name="sdm_1dp">1dp</dimen>
+    <dimen name="sdm_2dp">2dp</dimen>
+    <dimen name="sdm_6dp">6dp</dimen>
+    <dimen name="sdm_7dp">7dp</dimen>
+    <dimen name="sdm_8dp">8dp</dimen>
+    <dimen name="sdm_10dp">10dp</dimen>
+    <dimen name="sdm_11dp">11dp</dimen>
+    <dimen name="sdm_12dp">12dp</dimen>
+    <dimen name="sdm_13dp">13dp</dimen>
+    <dimen name="sdm_14dp">14dp</dimen>
+    <dimen name="sdm_18dp">18dp</dimen>
+    <dimen name="sdm_20dp">20dp</dimen>
+    <dimen name="sdm_21dp">21dp</dimen>
+    <dimen name="sdm_27dp">27dp</dimen>
+    <dimen name="sdm_35dp">35dp</dimen>
+    <dimen name="sdm_45dp">45dp</dimen>
+    <dimen name="sdm_60dp">60dp</dimen>
+    <dimen name="sdm_95dp">95dp</dimen>
+
+</resources>
