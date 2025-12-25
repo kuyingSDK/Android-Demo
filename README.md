@@ -38,11 +38,6 @@ The project has integrated privacy compliance features:
 - **Kuying SDK Integration Documentation**: [https://help.takuad.com/docs/tvnsmdoP](https://help.takuad.com/docs/tvnsmdoP)
 - **Developer Backend**: [https://help.takuad.com](https://help.takuad.com)
 
-## Version Information
-
-- **SDK Version**: 6.5.37
-- **Demo Version**: 1.0
-
 ## Support & Feedback
 
 For questions or suggestions, please contact Kuying technical support team.

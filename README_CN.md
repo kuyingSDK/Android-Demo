@@ -38,11 +38,6 @@
 - **酷盈SDK接入文档**: [https://help.takuad.com/docs/tvnsmdoP](https://help.takuad.com/docs/tvnsmdoP)
 - **开发者后台**: [https://help.takuad.com](https://help.takuad.com)
 
-## 版本信息
-
-- **SDK版本**: 6.5.37
-- **Demo版本**: 1.0
-
 ## 支持与反馈
 
 如有问题或建议，请联系酷盈技术支持团队。
