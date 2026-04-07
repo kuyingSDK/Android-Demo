@@ -108,7 +108,7 @@ public class SelfRenderViewUtil {
 
             }
 
-            @Override
+
             public void onClickCloseView() {
 
             }

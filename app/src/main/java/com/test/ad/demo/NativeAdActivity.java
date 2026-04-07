@@ -1,7 +1,9 @@
 package com.test.ad.demo;
 
 import android.annotation.SuppressLint;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,10 +13,10 @@ import android.widget.TextView;
 import com.smartdigimkt.sdk.api.AdError;
 import com.smartdigimkt.sdk.api.SDMAdConst;
 import com.smartdigimkt.sdk.api.SDMAdRequest;
-import com.smartdigimkt.sdk.api.SDMSDK;
 import com.smartdigimkt.sdk.api.format.SDMNative;
 import com.smartdigimkt.sdk.api.format.SDMNativeAd;
 import com.smartdigimkt.sdk.api.format.SDMNativeAdListener;
+import com.smartdigimkt.sdk.api.format.SDMNativeAdMediaViewListener;
 import com.smartdigimkt.sdk.api.format.SDMNativeLoadListener;
 import com.test.ad.demo.base.BaseActivity;
 import com.test.ad.demo.bean.CommonViewBean;
@@ -22,10 +24,7 @@ import com.test.ad.demo.util.SDKUtil;
 import com.test.ad.demo.util.SelfRenderViewUtil;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 public class NativeAdActivity extends BaseActivity implements View.OnClickListener {
 
@@ -43,6 +42,10 @@ public class NativeAdActivity extends BaseActivity implements View.OnClickListen
     private TextView mTVIsAdReadyBtn;
     private TextView mTVShowAdBtn;
     private View mPanel;
+
+    /** Last size passed to load(); used to give template branch a non-zero height when WRAP_CONTENT measures 0. */
+    private int mLastRequestedAdWidth;
+    private int mLastRequestedAdHeight;
 
     @Override
     protected int getContentViewId() {
@@ -67,7 +70,7 @@ public class NativeAdActivity extends BaseActivity implements View.OnClickListen
         commonViewBean.setSpinnerSelectPlacement(findViewById(R.id.spinner_1));
 
         String nativeType = getNativeAdTypeFromIntent();
-        if (nativeType.equals(NATIVE_SELF_RENDER_TYPE)) {
+        if (NATIVE_SELF_RENDER_TYPE.equals(nativeType)) {
             commonViewBean.setTitleResId(R.string.sdm_native_self);
         } else {
             commonViewBean.setTitleResId(R.string.sdm_native_express);
@@ -81,7 +84,8 @@ public class NativeAdActivity extends BaseActivity implements View.OnClickListen
     }
 
     private String getNativeAdTypeFromIntent() {
-        return getIntent().getStringExtra("native_type");
+        String type = getIntent().getStringExtra("native_type");
+        return TextUtils.isEmpty(type) ? NATIVE_SELF_RENDER_TYPE : type;
     }
 
     @Override
@@ -105,8 +109,11 @@ public class NativeAdActivity extends BaseActivity implements View.OnClickListen
     private void initPanel() {
         mPanel = findViewById(R.id.rl_panel);
         mSelfRenderView = findViewById(R.id.native_selfrender_view);
+        if (NATIVE_EXPRESS_TYPE.equals(getNativeAdTypeFromIntent())) {
+            mSelfRenderView.setVisibility(View.GONE);
+        }
         View closeView = mSelfRenderView.findViewById(R.id.native_ad_close);
-        if(closeView != null){
+        if (closeView != null) {
             closeView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -140,11 +147,66 @@ public class NativeAdActivity extends BaseActivity implements View.OnClickListen
         });
     }
 
+    private static SDMNativeAdMediaViewListener nativeMediaListener() {
+        return new SDMNativeAdMediaViewListener() {
+            @Override
+            public void onVideoAdStartPlay(long l) {
+            }
+
+            @Override
+            public void onVideoAdComplete() {
+            }
+
+            @Override
+            public void onVideoError(String s, String s1) {
+            }
+
+            @Override
+            public void onProgressUpdate(long l, long l1) {
+            }
+
+
+            public void onClickCloseView() {
+            }
+        };
+    }
+
     private void loadAd(int adViewWidth, int adViewHeight) {
+        mLastRequestedAdWidth = adViewWidth;
+        mLastRequestedAdHeight = adViewHeight;
         SDKUtil.start();
         printLogOnUI(getString(R.string.sdm_ad_status_loading));
-        SDMAdRequest sdmAdRequest = new SDMAdRequest.Builder().setAdWidth(adViewWidth).setAdHeight(adViewHeight).build();
+        SDMAdRequest sdmAdRequest = new SDMAdRequest.Builder()
+                .setAdWidth(adViewWidth)
+                .setAdHeight(adViewHeight)
+                .build();
         mSDMNative.load(sdmAdRequest);
+    }
+
+    private int computeNativeSlotWidthPx() {
+        int w = mNativeAdView != null && mNativeAdView.getWidth() > 0
+                ? mNativeAdView.getWidth()
+                : getResources().getDisplayMetrics().widthPixels;
+        if (mLastRequestedAdWidth > 0) {
+            w = mLastRequestedAdWidth;
+        }
+        return w;
+    }
+
+    private int computeNativeSlotHeightPx() {
+        if (mLastRequestedAdHeight > 0) {
+            return mLastRequestedAdHeight;
+        }
+        if (mNativeAd != null) {
+            int ih = mNativeAd.getAdImageHeight();
+            int iw = mNativeAd.getAdImageWidth();
+            if (ih > 0 && iw > 0) {
+                int w = computeNativeSlotWidthPx();
+                return Math.max(1, ih * w / iw);
+            }
+        }
+        int w = computeNativeSlotWidthPx();
+        return w * 3 / 4;
     }
 
     private boolean isAdReady() {
@@ -156,7 +218,6 @@ public class NativeAdActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void showAd() {
-//        NativeAd nativeAd = mATNative.getNativeAd();
         if (mNativeAd != null) {
 
             mNativeAd.setListener(new SDMNativeAdListener() {
@@ -187,17 +248,38 @@ public class NativeAdActivity extends BaseActivity implements View.OnClickListen
 
                 @Override
                 public void onShowFailed(AdError adError) {
-
+                    Log.w(TAG, "onShowFailed: " + (adError != null ? adError.getErrorInfo() : "null"));
+                    printLogOnUI("onShowFailed: " + (adError != null ? adError.getErrorInfo() : ""));
                 }
             });
 
-
             mNativeAdView.removeAllViews();
 
-
-            List<View> clickViews  = null;
+            List<View> clickViews = null;
+            final boolean[] templateShown = {false};
             try {
                 if (mNativeAd.isTemplateAd()) {
+                    View mediaView = mNativeAd.getMediaView(this, nativeMediaListener());
+                    if (mediaView != null) {
+
+                        if (mediaView.getParent() instanceof ViewGroup) {
+                            ((ViewGroup) mediaView.getParent()).removeView(mediaView);
+                        }
+                        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+                                FrameLayout.LayoutParams.MATCH_PARENT,
+                                FrameLayout.LayoutParams.WRAP_CONTENT);
+                        lp.gravity = Gravity.CENTER;
+                        mNativeAdView.addView(mediaView, lp);
+
+                        mNativeAd.onResume();
+                        mNativeAd.registerAdView(mNativeAdView, null, null, null, null);
+                        Log.i(TAG, "template/express: attached getMediaView(), childCount=" + mNativeAdView.getChildCount());
+                    } else {
+
+                        printLogOnUI("template/express: getMediaView() null");
+                        Log.w(TAG, "getCustomAdContainer() and getMediaView() both null");
+
+                    }
                 } else {
                     ViewGroup nativeAdContainer = mNativeAd.getCustomAdContainer();
                     FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
@@ -205,27 +287,37 @@ public class NativeAdActivity extends BaseActivity implements View.OnClickListen
                             FrameLayout.LayoutParams.WRAP_CONTENT);
                     mNativeAdView.addView(nativeAdContainer, params);
                     if (mSelfRenderView.getParent() != null) {
-                        ((ViewGroup)mSelfRenderView.getParent()).removeView(mSelfRenderView);
+                        ((ViewGroup) mSelfRenderView.getParent()).removeView(mSelfRenderView);
                     }
                     nativeAdContainer.addView(mSelfRenderView);
                     clickViews = SelfRenderViewUtil.bindSelfRenderView(this, mNativeAd, mSelfRenderView);
-
-
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                printLogOnUI("showAd error: " + e.getMessage());
             }
-            mNativeAd.registerAdView(mNativeAdView, clickViews, null, null, null);
             mNativeAdView.setVisibility(View.VISIBLE);
             mPanel.setVisibility(View.VISIBLE);
+            if (templateShown[0]) {
+                final ViewGroup templateRoot = (ViewGroup) mNativeAdView.getChildAt(0);
+                mNativeAdView.post(() -> {
+                    if (mNativeAd == null || templateRoot == null || templateRoot.getParent() != mNativeAdView) {
+                        return;
+                    }
+                    int h = computeNativeSlotHeightPx();
+                    FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.MATCH_PARENT, h);
+                    templateRoot.setLayoutParams(lp);
+                    mNativeAd.registerAdView(templateRoot, null, null, lp, null);
+                    mNativeAdView.requestLayout();
+                });
+            } else {
+                mNativeAd.registerAdView(mNativeAdView, clickViews, null, null, null);
+            }
         } else {
             printLogOnUI("this placement no cache!");
         }
     }
-
-//    public void changeBg(View view,boolean selected) {
-//        view.setBackgroundResource(selected ? R.drawable.bg_white_selected : R.drawable.bg_white);
-//    }
 
     @Override
     protected void onDestroy() {
@@ -281,7 +373,9 @@ public class NativeAdActivity extends BaseActivity implements View.OnClickListen
 
         switch (v.getId()) {
             case R.id.load_ad_btn:
-                final int adViewWidth = mNativeAdView.getWidth() != 0 ? mNativeAdView.getWidth() : getResources().getDisplayMetrics().widthPixels;
+                final int adViewWidth = mNativeAdView.getWidth() != 0
+                        ? mNativeAdView.getWidth()
+                        : getResources().getDisplayMetrics().widthPixels;
                 final int adViewHeight = adViewWidth * 3 / 4;
                 loadAd(adViewWidth, adViewHeight);
                 break;

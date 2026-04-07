@@ -128,6 +128,9 @@ public class InitSDkActivity extends Activity {
     }
 
     private void initSetting() {
+
+        SDMSDK.getInstance().getSetting().setDebug(false);
+
         //"1":同意，”2“:不同意
         String spPersonAd = getSPString(InitSDkActivity.this, "ad_setting", "person_ad", "2");
         boolean allowPersonAd = TextUtils.equals("1", spPersonAd);

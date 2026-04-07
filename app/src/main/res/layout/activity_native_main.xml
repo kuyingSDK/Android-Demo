@@ -74,6 +74,45 @@
                 </LinearLayout>
             </RelativeLayout>
 
+            <RelativeLayout
+                android:id="@+id/nativeExpressBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/sdm_8dp"
+                android:background="@drawable/bg_white"
+                android:padding="@dimen/sdm_8dp">
+
+                <LinearLayout
+                    android:id="@+id/ll_native_express"
+                    android:layout_width="@dimen/sdm_pic_size"
+                    android:layout_height="@dimen/sdm_pic_size"
+                    android:background="@drawable/shape_gray_width1_corners2"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="@dimen/sdm_pic_width"
+                        android:layout_height="@dimen/sdm_pic_height"
+                        android:src="@mipmap/ic_test_native" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="@dimen/sdm_title_margin_left"
+                    android:layout_toRightOf="@id/ll_native_express"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/sdm_native_express"
+                        android:textColor="@android:color/black"
+                        android:textSize="@dimen/sdm_title_size" />
+                </LinearLayout>
+            </RelativeLayout>
+
         </LinearLayout>
 
     </ScrollView>
